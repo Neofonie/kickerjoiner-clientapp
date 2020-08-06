@@ -6,3 +6,4 @@
   - expo-template-blank
 4. icon: https://thenounproject.com/term/table-soccer/2931619/
 5. npm run start
+
