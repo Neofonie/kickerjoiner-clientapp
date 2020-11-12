@@ -1,6 +1,6 @@
 // https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
-const onlineApi = 'https://kij.willy-selma.de/db';
-export const wsApi = 'wss://kij.willy-selma.de/ws';
+const onlineApi = 'https://kij.willy-selma.de/db2';
+export const wsApi = 'wss://kij.willy-selma.de/ws2';
 
 // client part
 let pingTimeout = null;
@@ -38,7 +38,7 @@ export function sendMessage(data) {
     }
 }
 
-export function connectToWSS(setState) {
+export function connectToWSS(setState, onMessage) {
     setState({
         socketEvent: 'connectToWSS',
         socketConnection: false,
@@ -51,6 +51,7 @@ export function connectToWSS(setState) {
         console.log('socket.message', event.data);
         const data = event.data;
         console.log(data);
+        onMessage(JSON.parse(data));
         switch (data.message) {
             case 'CONNECTION_ON': // connection with server is on
                 // store date && clientid
@@ -59,19 +60,19 @@ export function connectToWSS(setState) {
                 // store data.gameid to compare joined game
                 // ----
                 // GET fetch /db/games/data.gameid
-                const game = await db('GET', '/games/' + data.gameid);
-                setState({
-                    stateText: JSON.stringify(game, null, 2),
-                    gameid: data.gameid,
-                });
+                //const game = await db('GET', '/games/' + data.gameid);
+                /* setState({
+                    //stateText: JSON.stringify(game, null, 2),
+                    //gameid: data.gameid,
+                }); */
                 // refresh state to rerender
                 break;
             case 'GAME_READY': // four joiners in one game
                 // now activate gogogo button
-                setState({
+                /* setState({
                     gogogoVisible: true,
                     gameid: data.gameid,
-                });
+                }); */
                 // vibrate app
                 // ----
                 // GET fetch /db/games/data.gameid
@@ -140,13 +141,26 @@ export function callPlusOne(nick) {
     });
 }
 
-export function callGOGOGO(gameid) {
+export async function setGOGOGO(nickname, gameID) {
+    const game = await db('GET', '/games/' + gameID);
+    const gogogoPlayer = game.joiner.map((player) => {
+        if (player.nick === nickname) {
+            player.gogogo = true;
+        }
+        return player;
+    });
+    await db('PATCH', '/games/' + gameID, {
+        joiner: gogogoPlayer,
+    });
+
     sendMessage({
-        message: 'GOGOGO',
-        gameid: gameid,
+        message: 'GAME_UPDATE',
+        gameid: gameID,
+        reason: 'gogogo joiner',
     });
 }
 
 export async function getActiveGames() {
-    const game = await db('GET', '/games/' + data.gameid);
+    const games = await db('GET', '/games?done=false&_sort=date&_order=desc');
+    return games;
 }
