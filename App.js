@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { heartbeat, sendMessage, connectToWSS, getTimestampNow, db, callPlusOne, callGOGOGO } from "./src/api";
+import { db, connectToWSS, callPlusOne, callGOGOGO} from "./src/api";
 
 function Br() {
     return '\n';
@@ -10,7 +10,8 @@ function Br() {
 export default class App extends Component {
     constructor(props) {
         super(props);
-        this.socket = null;
+        this.mountedBulli = false;
+        this.socket;
 
         this.state = {
             nickname: '',
@@ -18,15 +19,19 @@ export default class App extends Component {
             gogogoVisible: false,
             stateText: '',
             socketConnection: false,
+            socketEvent: '',
             socketError: '',
         }
     }
 
-    setupConnection() {
-        connectToWSS(this.setState);
+    async setupConnection(callback) {
+        connectToWSS((state) => {
+            this.setState({...state});
+        })
     }
 
     componentDidMount() {
+        console.log('componentDidMount');
         this.setupConnection();
     }
 
@@ -58,6 +63,7 @@ export default class App extends Component {
                 <Text style={styles.baseText}>
                     <Br/>
                     <Text style={styles.stateText}>{this.state.socketConnection ? 'connected' : 'no connection'}</Text> <Br/>
+                    <Text style={styles.stateText}>{this.state.socketEvent || 'no event'}</Text> <Br/>
                     <Text style={styles.stateText}>{this.state.socketError || 'no error'}</Text> <Br/>
                     <Text style={styles.stateText}>{this.state.stateText || 'no state'}</Text> <Br/>
                 </Text>

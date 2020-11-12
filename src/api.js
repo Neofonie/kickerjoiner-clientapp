@@ -1,12 +1,12 @@
 // https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
 const onlineApi = 'https://kij.willy-selma.de/db';
-const wsApi = 'wss://kij.willy-selma.de/ws';
+export const wsApi = 'wss://kij.willy-selma.de/ws';
 
 // client part
 let pingTimeout = null;
 let socket;
 
-export function heartbeat() {
+export function heartbeat(socket) {
     console.log('heartbeat');
     if (pingTimeout !== null) {
         clearTimeout(pingTimeout);
@@ -32,7 +32,7 @@ export function heartbeat() {
  * @param data
  */
 export function sendMessage(data) {
-    console.log('sendMessage', data, socket)
+    console.log('sendMessage', data)
     if (socket) {
         socket.send(JSON.stringify(data));
     }
@@ -40,69 +40,80 @@ export function sendMessage(data) {
 
 export function connectToWSS(setState) {
     setState({
+        socketEvent: 'connectToWSS',
         socketConnection: false,
     });
+
     console.log('connectToWSS', wsApi);
     socket = new WebSocket(wsApi);
 
-    socket.on('message', async (json) => {
-        console.log('socket.message', json);
-        const data = JSON.parse(json);
+    socket.onmessage = async (event) => {
+        console.log('socket.message', event.data);
+        const data = event.data;
         console.log(data);
         switch (data.message) {
             case 'CONNECTION_ON': // connection with server is on
                 // store date && clientid
                 break;
             case 'GAME_UPDATE': // joined game got an update
-                                // store data.gameid to compare joined game
-                                // ----
-                                // GET fetch /db/games/data.gameid
+                // store data.gameid to compare joined game
+                // ----
+                // GET fetch /db/games/data.gameid
                 const game = await db('GET', '/games/' + data.gameid);
-                setState({stateText: JSON.stringify(game, null, 2), gameid: data.gameid});
+                setState({
+                    stateText: JSON.stringify(game, null, 2),
+                    gameid: data.gameid,
+                });
                 // refresh state to rerender
                 break;
             case 'GAME_READY': // four joiners in one game
                 // now activate gogogo button
-                setState({gogogoVisible: true, gameid: data.gameid});
+                setState({
+                    gogogoVisible: true,
+                    gameid: data.gameid,
+                });
                 // vibrate app
                 // ----
                 // GET fetch /db/games/data.gameid
                 // refresh state to rerender
                 break;
             case 'GAME_GOGOGO': // all four joiners pressed gogog in one game
-                                // vibrate app
-                                // gogogo screen
-                                // ----
-                                // GET fetch /db/games/data.gameid
-                                // refresh state to rerender
-                                // ----
-                                // clear state for new game
+                // vibrate app
+                // gogogo screen
+                // ----
+                // GET fetch /db/games/data.gameid
+                // refresh state to rerender
+                // ----
+                // clear state for new game
                 break;
         }
-    });
-
-    socket.on('open', () => {
-        heartbeat();
+    }
+    socket.onopen = () => {
         setState({
+            socketEvent: 'open',
             socketConnection: true,
         });
-    });
-    socket.on('ping', heartbeat);
-    socket.on('error', (e) => {
+        heartbeat();
+    };
+    socket.onping = heartbeat;
+    socket.onerror = (e) => {
         console.log('socket.error', e);
         setState({
+            socketEvent: 'error',
+            socketConnection: false,
             socketError: e,
         });
-    });
-    socket.on('close', (e) => {
+    };
+    socket.onclose = (e) => {
         console.log('socket.close', e);
         clearTimeout(pingTimeout);
         setState({
+            socketEvent: 'close',
             socketConnection: false,
         });
-    });
+    };
 
-    return socket;
+    console.log('connectToWSS done');
 }
 
 export function getTimestampNow() {
@@ -134,4 +145,8 @@ export function callGOGOGO(gameid) {
         message: 'GOGOGO',
         gameid: gameid,
     });
+}
+
+export async function getActiveGames() {
+    const game = await db('GET', '/games/' + data.gameid);
 }
