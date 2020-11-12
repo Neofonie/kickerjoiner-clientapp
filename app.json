@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "HelloWorld",
+    "name": "Kickerjoiner",
     "slug": "kickerjoiner",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#e60023"
+      "backgroundColor": "#CA0000"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
