@@ -19,8 +19,8 @@
     "react-native": "https://github.com/expo/react-native/archive/sdk-38.0.2.tar.gz",
     "react-native-background-task": "^0.2.1",
     "react-native-permissions": "^2.0.9",
-    "react-native-table-component": "^1.2.1",
-    "react-native-web": "~0.11.7",
+    "react-native-web": "^0.11.7",
+    "react-native-container": "^1.0.6",
     "ws": "^7.2.1"
   },
   "devDependencies": {

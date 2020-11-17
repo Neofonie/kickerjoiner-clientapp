@@ -1,6 +1,6 @@
 // https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
-const onlineApi = 'https://kij.willy-selma.de/db2';
-export const wsApi = 'wss://kij.willy-selma.de/ws2';
+const onlineApi = 'https://kij.willy-selma.de/db';
+export const wsApi = 'wss://kij.willy-selma.de/ws';
 
 // client part
 let pingTimeout = null;
