@@ -2,10 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { db, connectToWSS, callPlusOne, setGOGOGO, getActiveGames } from "./src/api";
-
-function Br() {
-    return '\n';
-}
+import styles, { Br } from './src/styles';
 
 export default class App extends Component {
     constructor(props) {
@@ -25,7 +22,8 @@ export default class App extends Component {
 
     async setupConnection(callback) {
         connectToWSS((state) => {
-            this.setState({ ...state });
+            console.log("state", state)
+            //this.setState({ ...state });
         }, async (data) => {
             console.log('on message: ', data)
             switch (data.message) {
@@ -85,7 +83,7 @@ export default class App extends Component {
                 <TextInput
                     style={styles.input}
                     value={this.state.nickname}
-                    onChangeText={(text) => this.setState({ nickname: text })}
+                    //onChangeText={(text) => this.setState({ nickname: text })}
                     onKeyPress={(event) => {
                         (event.key === 'ENTER')
                             ? callPlusOne(this.state.nickname)
@@ -122,26 +120,3 @@ export default class App extends Component {
         );
     }
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#CA0000',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    input: {
-        height: 40,
-        padding: 10,
-        borderColor: 'gray',
-        borderWidth: 1,
-        backgroundColor: '#fff',
-    },
-    baseText: {
-        color: '#fff',
-        textAlign: 'center',
-    },
-    stateText: {
-        color: '#000',
-    },
-});
