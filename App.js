@@ -1,16 +1,16 @@
 import React, { Component, Fragment } from 'react';
 import { Text, View, TextInput, Button } from 'react-native';
 import Container from 'react-native-container';
-import { StatusBar } from 'expo-status-bar';
 import { connectToWSS, callPlusOne, setGOGOGO, getActiveGames } from "./src/api";
-import styles, { Br, HRDate } from './src/styles';
+import { styles, Br } from './src/styles';
+import Games from './src/Games';
 
 export default class App extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            nickname: 'tim',
+            nickname: 'peter',
             gameid: -1,
             gogogoVisible: false,
             stateText: '',
@@ -27,7 +27,6 @@ export default class App extends Component {
         connectToWSS((state) => {
             this.setState({ ...state });
         }, async (data) => {
-            console.log('on message: ', data)
             switch (data.message) {
                 case 'CONNECTION_ON': // connection with server is on
                     // store date && clientid
@@ -52,7 +51,7 @@ export default class App extends Component {
         const games = await getActiveGames();
         this.setState({ games });
 
-        if (games[0].joiner.length === 4) {
+        if (games && games.length > 0 && games[0].joiner.length === 4) {
             this.setState({
                 gogogoVisible: true
             })
@@ -62,8 +61,10 @@ export default class App extends Component {
     renderGoButton(player, gameID) {
         return (
             <Fragment>
-                {player.gogogo && <Text>GOGOGO</Text>}
+                {!player.gogogo && !this.state.gogogoVisible && <Text style={styles.center}>+1</Text>}
+                {player.gogogo && <Text style={styles.center}>GOGOGO</Text>}
                 {!player.gogogo && this.state.gogogoVisible && <Button
+                    style={styles.gameCell}
                     onPress={() => setGOGOGO(player.nick, gameID)}
                     title="GOGOGO"
                 />}
@@ -71,44 +72,39 @@ export default class App extends Component {
         );
     }
 
-    renderGames() {
-        return (this.state.games.map((game) => (
-            <Container key={game.id}>
-                <Text># {game.id} / {HRDate(game.date)}</Text>
-                {game.joiner.map((player) => (
-                    <Container row>
-                        <Container><Text>{player.nick}</Text></Container>
-                        <Container size={1}><Text>{HRDate(player.date)}</Text></Container>
-                        <Container>{this.renderGoButton(player, game.id)}</Container>
-                    </Container>
-                ))}
-            </Container>
-        )));
+    renderJoiner() {
+        return (
+            <Fragment>
+                <TextInput
+                    style={styles.input}
+                    onChangeText={(text) => this.setState({ nickname: text })}
+                    onKeyPress={(event) => {
+                        (event.key === 'ENTER')
+                            ? callPlusOne(this.state.nickname)
+                            : null
+                    }}
+                    value={this.state.nickname}
+                    placeholder="nickname"
+                />
+                <Button
+                    onPress={() => callPlusOne(this.state.nickname)}
+                    title="+1"
+                />
+            </Fragment>
+        );
     }
 
     render() {
         return (
             <View style={styles.container}>
                 <Container col>
-                    <Container size={2} style={{ ...styles.container }} row>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={(text) => this.setState({ nickname: text })}
-                            onKeyPress={(event) => {
-                                (event.key === 'ENTER')
-                                    ? callPlusOne(this.state.nickname)
-                                    : null
-                            }}
-                            value={this.state.nickname}
-                            placeholder="nickname"
-                        />
-                        {!this.state.gogogoVisible && <Button
-                            onPress={() => callPlusOne(this.state.nickname)}
-                            title="+1"
-                        />}
+                    <Container size={2} style={styles.container} row>
+                        {this.renderJoiner()}
+                    </Container>
+                    <Container>
+                        <Games games={this.state.games} />
                     </Container>
                     <Container size={2}>
-                        {this.renderGames()}
                     </Container>
                     <Container col>
                         <Button

@@ -14,7 +14,7 @@ export function HRDate(timestamp) {
     return `${day}.${month}.${year} ${hour}:${min}`;
 }
 
-export default styles = StyleSheet.create({
+export const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#CA0000',
@@ -35,4 +35,7 @@ export default styles = StyleSheet.create({
     stateText: {
         color: '#000',
     },
+    center: {
+        textAlign: 'center',
+    }
 });
