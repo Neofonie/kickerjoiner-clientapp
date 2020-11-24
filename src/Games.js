@@ -1,40 +1,48 @@
 import React, { Component, Fragment } from 'react';
 import Container from "react-native-container/src/index";
-import { StyleSheet, Text } from "react-native";
-import { HRDate } from "./styles";
+import { Button, StyleSheet, Text } from "react-native";
+import { HRDate, StylesGlobal, StylesGlobalObj, Colors, Spacing, FontBold, FontSize } from "./styles";
+import { setGOGOGO } from "./api";
 
 export default class Games extends Component {
-    constructor(props) {
-        super(props);
 
-        this.state = {
-            gogogoVisible: false,
-            games: [],
-        }
+    renderGoButton(player, gameID) {
+        const gogogoVisible = (this.props.games && this.props.games.length > 0 && this.props.games[0].joiner.length === 4);
+        return (
+            <Fragment>
+                {!player.gogogo && !gogogoVisible && <Text>+1</Text>}
+                {player.gogogo && <Text style={styles.gogogoBtn}>GOGOGO</Text>}
+                {!player.gogogo && gogogoVisible && <Button
+                    style={styles.cell}
+                    onPress={() => setGOGOGO(player.id, gameID)}
+                    title="GOGOGO"
+                />}
+            </Fragment>
+        );
     }
 
-    render() {
+    render(props) {
         return (
-            <Container style={styles.games}>
-                {this.state.games.length === 0 && <Text>No Games available yet. Join one +1</Text>}
-                {this.state.games.length > 0 && this.state.games.map((game) => (
-                    <Container key={game.id}>
+            <Container>
+                {this.props.games.length === 0 && <Text style={styles.nogames}>No Games available. Join one!</Text>}
+                {this.props.games.length > 0 && this.props.games.map((game) => (
+                    <Container style={styles.games} key={game.id}>
                         <Text
-                            style={{ ...styles.gameRow, ...styles.gameHeader }}># {game.id} / {HRDate(game.date)}</Text>
-                        <Container row style={{ ...styles.gameRow, ...styles.gameRowHeader }}>
-                            <Container size={1}><Text style={styles.center}>Clnt</Text></Container>
-                            <Container size={1}><Text>Nick</Text></Container>
-                            <Container size={2}><Text style={styles.center}>Date</Text></Container>
-                            <Container size={1}><Text style={styles.center}>State</Text></Container>
+                            style={styles.header}># {game.id} / {HRDate(game.date)}</Text>
+                        <Container row style={styles.rowHeader}>
+                            <Container size={1} center><Text style={styles.cellH}>ID</Text></Container>
+                            <Container size={1} center><Text style={styles.cellH}>CID</Text></Container>
+                            <Container size={2} center><Text style={styles.cellH}>Nick</Text></Container>
+                            <Container size={3} center><Text style={styles.cellH}>Date</Text></Container>
+                            <Container size={3} center><Text style={styles.cellH}>State</Text></Container>
                         </Container>
                         {game.joiner.map((player) => (
-                            <Container row key={player.nick} style={styles.gameRow}>
-                                <Container size={1}><Text
-                                    style={{ ...styles.gameCell, ...styles.center }}>{player.client_id}</Text></Container>
-                                <Container size={1}><Text style={styles.gameCell}>{player.nick}</Text></Container>
-                                <Container size={2}><Text
-                                    style={styles.gameCell}>{HRDate(player.date)}</Text></Container>
-                                <Container size={1}>{this.renderGoButton(player, game.id)}</Container>
+                            <Container row key={player.id} style={styles.row}>
+                                <Container size={1} center><Text style={styles.cell}>{player.id}</Text></Container>
+                                <Container size={1} center><Text style={styles.cell}>{player.clientid}</Text></Container>
+                                <Container size={2} center><Text style={styles.cell}>{player.nick}</Text></Container>
+                                <Container size={3} center><Text style={styles.cell}>{HRDate(player.date)}</Text></Container>
+                                <Container size={3} center>{this.renderGoButton(player, game.id)}</Container>
                             </Container>
                         ))}
                     </Container>
@@ -42,28 +50,40 @@ export default class Games extends Component {
             </Container>)
     }
 }
-
-export const styles = StyleSheet.create({
+const row = {
+    padding: Spacing.md,
+};
+const styles = {
+    nogames: row,
     games: {
-        backgroundColor: '#fff',
-        color: '#000',
-        borderRadius: 5,
-        marginBottom: 24,
-        width: 300,
+        backgroundColor: Colors.white,
+        color: Colors.black,
+        borderRadius: Spacing.borderRadius,
     },
-    gameHeader: {
-        borderTopLeftRadius: 5,
-        borderTopRightRadius: 5,
-        backgroundColor: '#ccc',
-        fontWeight: 'bold',
+    row: row,
+    header: {
+        borderTopLeftRadius: Spacing.borderRadius,
+        borderTopRightRadius: Spacing.borderRadius,
+        backgroundColor: Colors.grey,
+        ...FontBold,
+        ...FontSize(1),
+        ...row,
     },
-    gameRowHeader: {
-        backgroundColor: '#e3e3e3',
+    rowHeader: {
+        backgroundColor: Colors.greyLight,
+        paddingLeft: Spacing.md,
+        paddingRight: Spacing.md,
     },
-    gameRow: {
-        padding: 6,
+    cellH: {
+        height: 20,
+        ...FontSize(-1),
     },
-    gameCell: {
-        height: 40
+    cell: {
+        height: 40,
     },
-});
+    gogogoBtn: {
+        width: 100,
+    }
+};
+
+export const Styles = StyleSheet.create(styles);

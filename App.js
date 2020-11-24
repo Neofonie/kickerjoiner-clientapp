@@ -1,44 +1,49 @@
 import React, { Component, Fragment } from 'react';
-import { Text, View, TextInput, Button } from 'react-native';
+import { ScrollView } from 'react-native';
 import Container from 'react-native-container';
-import { connectToWSS, callPlusOne, setGOGOGO, getActiveGames } from "./src/api";
-import { styles, Br } from './src/styles';
+import { connectToWSS, getActiveGames, sendMessage } from "./src/api";
+import { Colors, StylesGlobal } from './src/styles';
+import Joiner from './src/Joiner';
 import Games from './src/Games';
+import State from './src/State';
 
 export default class App extends Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            nickname: 'peter',
-            gameid: -1,
-            gogogoVisible: false,
-            stateText: '',
-            games: [],
-            socket: {
-                connection: false,
-                lastEvent: '',
-                error: '',
-            },
-        }
+    state = {
+        nickname: '',
+        gameid: -1,
+        gogogoVisible: false,
+        stateText: '',
+        games: [],
+        socket: {
+            connection: false,
+            lastEvent: '',
+            error: '',
+        },
     }
 
-    async setupConnection(callback) {
+    async setupConnection() {
         connectToWSS((state) => {
             this.setState({ ...state });
         }, async (data) => {
+            console.log('in react', data);
             switch (data.message) {
                 case 'CONNECTION_ON': // connection with server is on
                     // store date && clientid
+                    sendMessage({
+                        message: 'SET_CLIENTNICK',
+                        type: ['react'].join(' / '),
+                        nick: null,
+                    });
                     break;
                 case 'GAME_UPDATE': // joined game got an update
-                    console.log('Game Update')
-                    const games = await getActiveGames();
-                    this.setState({ games })
+                    console.log('GAME_UPDATE')
+                    this.setState({ games: await getActiveGames() })
                     break;
                 case 'GAME_READY': // joined game got an update
+                    console.log('GAME_READY')
                     this.setState({
-                        gogogoVisible: true
+                        gogogoVisible: true,
+                        games: await getActiveGames()
                     });
                     break;
             }
@@ -46,83 +51,26 @@ export default class App extends Component {
     }
 
     async componentDidMount() {
-        console.log('componentDidMount');
         await this.setupConnection();
         const games = await getActiveGames();
         this.setState({ games });
-
-        if (games && games.length > 0 && games[0].joiner.length === 4) {
-            this.setState({
-                gogogoVisible: true
-            })
-        }
-    }
-
-    renderGoButton(player, gameID) {
-        return (
-            <Fragment>
-                {!player.gogogo && !this.state.gogogoVisible && <Text style={styles.center}>+1</Text>}
-                {player.gogogo && <Text style={styles.center}>GOGOGO</Text>}
-                {!player.gogogo && this.state.gogogoVisible && <Button
-                    style={styles.gameCell}
-                    onPress={() => setGOGOGO(player.nick, gameID)}
-                    title="GOGOGO"
-                />}
-            </Fragment>
-        );
-    }
-
-    renderJoiner() {
-        return (
-            <Fragment>
-                <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => this.setState({ nickname: text })}
-                    onKeyPress={(event) => {
-                        (event.key === 'ENTER')
-                            ? callPlusOne(this.state.nickname)
-                            : null
-                    }}
-                    value={this.state.nickname}
-                    placeholder="nickname"
-                />
-                <Button
-                    onPress={() => callPlusOne(this.state.nickname)}
-                    title="+1"
-                />
-            </Fragment>
-        );
     }
 
     render() {
         return (
-            <View style={styles.container}>
-                <Container col>
-                    <Container size={2} style={styles.container} row>
-                        {this.renderJoiner()}
-                    </Container>
-                    <Container>
-                        <Games games={this.state.games} />
-                    </Container>
-                    <Container size={2}>
-                    </Container>
-                    <Container col>
-                        <Button
-                            onPress={() => this.setupConnection()}
-                            title="reconnect"
-                        />
-                        <Text style={styles.baseText}>
-                            <Br/>
-                            <Text
-                                style={styles.stateText}>{this.state.socketConnection ? 'connected' : 'no connection'}</Text>
-                            <Br/>
-                            <Text style={styles.stateText}>{this.state.socketEvent || 'no event'}</Text> <Br/>
-                            <Text style={styles.stateText}>{this.state.socketError || 'no error'}</Text> <Br/>
-                            <Text style={styles.stateText}>{this.state.stateText || 'no state'}</Text> <Br/>
-                        </Text>
-                    </Container>
+            <Container style={{backgroundColor: Colors.red,}}>
+                <Container row style={{alignItems: 'flex-end'}}>
+                    <Joiner {...this.state} setState={(props)=>this.setState({...props})} />
                 </Container>
-            </View>
+                <Container size={4} style={StylesGlobal.container}>
+                    <ScrollView style={{alignSelf: 'stretch'}}>
+                        <Games games={this.state.games}/>
+                    </ScrollView>
+                </Container>
+                <Container center style={{alignItems: 'flex-start'}}>
+                    <State {...this.state} setupConnection={this.setupConnection} />
+                </Container>
+            </Container>
         );
     }
 }

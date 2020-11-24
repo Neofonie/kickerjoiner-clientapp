@@ -48,46 +48,8 @@ export function connectToWSS(setState, onMessage) {
     socket = new WebSocket(wsApi);
 
     socket.onmessage = async (event) => {
-        console.log('socket.message', event.data);
         const data = event.data;
-        console.log(data);
         onMessage(JSON.parse(data));
-        switch (data.message) {
-            case 'CONNECTION_ON': // connection with server is on
-                // store date && clientid
-                break;
-            case 'GAME_UPDATE': // joined game got an update
-                // store data.gameid to compare joined game
-                // ----
-                // GET fetch /db/games/data.gameid
-                //const game = await db('GET', '/games/' + data.gameid);
-                /* setState({
-                    //stateText: JSON.stringify(game, null, 2),
-                    //gameid: data.gameid,
-                }); */
-                // refresh state to rerender
-                break;
-            case 'GAME_READY': // four joiners in one game
-                // now activate gogogo button
-                /* setState({
-                    gogogoVisible: true,
-                    gameid: data.gameid,
-                }); */
-                // vibrate app
-                // ----
-                // GET fetch /db/games/data.gameid
-                // refresh state to rerender
-                break;
-            case 'GAME_GOGOGO': // all four joiners pressed gogog in one game
-                // vibrate app
-                // gogogo screen
-                // ----
-                // GET fetch /db/games/data.gameid
-                // refresh state to rerender
-                // ----
-                // clear state for new game
-                break;
-        }
     }
     socket.onopen = () => {
         setState({
@@ -141,10 +103,10 @@ export function callPlusOne(nick) {
     });
 }
 
-export async function setGOGOGO(nickname, gameID) {
+export async function setGOGOGO(playerID, gameID) {
     const game = await db('GET', '/games/' + gameID);
     const gogogoPlayer = game.joiner.map((player) => {
-        if (player.nick === nickname) {
+        if (player.id === playerID) {
             player.gogogo = true;
         }
         return player;
@@ -156,11 +118,15 @@ export async function setGOGOGO(nickname, gameID) {
     sendMessage({
         message: 'GAME_UPDATE',
         gameid: gameID,
+        playerid: playerID,
         reason: 'gogogo joiner',
     });
 }
 
 export async function getActiveGames() {
-    const games = await db('GET', '/games?done=false&_sort=date&_order=desc');
+    const showLastHourGames = getTimestampNow() - 3600; // 3600 = 1h in sec
+    //const games = await db('GET', `/games?donedate_gte=${showLastHourGames}&_sort=date&_order=desc`);
+    const games = await db('GET', `/games?_sort=date&_order=desc`);
+    console.log('games', games)
     return games;
 }
