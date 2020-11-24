@@ -80,6 +80,8 @@ const styles = {
     },
     cell: {
         height: 40,
+        textAlign: 'center',
+        backgroundColor: 'red'
     },
     gogogoBtn: {
         width: 100,

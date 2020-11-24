@@ -8,7 +8,6 @@ export default class Joiner extends Component {
     render() {
         return (
             <Container center style={StylesJoiner.wrap}>
-                <Text style={StylesJoiner.text}>Joiner</Text>
                 <Container row center style={StylesJoiner.inputGroup}>
                     <TextInput
                         style={StylesJoiner.input}

@@ -49,7 +49,7 @@ export const FontBold = { fontWeight: 'bold' };
 export const StylesGlobalObj = {
     container: {
         backgroundColor: Colors.red,
-        padding: Spacing.md,
+        padding: Spacing.lg,
     },
     input: {
         height: 40,
