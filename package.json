@@ -21,7 +21,10 @@
     "react-native-permissions": "^2.0.9",
     "react-native-web": "^0.14.8",
     "react-native-container": "^1.0.6",
-    "react-native-div": "^1.1.2",
+    "react-native-svg": "^12.1.0",
+    "@fortawesome/fontawesome-svg-core": "^1.2.32",
+    "@fortawesome/free-regular-svg-icons": "^5.15.1",
+    "@fortawesome/react-native-fontawesome": "^0.2.6",
     "@react-native-community/netinfo": "^5.9.7",
     "ws": "^7.4.0"
   },

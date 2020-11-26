@@ -17,6 +17,7 @@ export function HRDate(timestamp) {
 
 export const Colors = {
     red: '#CA0000',
+    green: '#1fb813',
     white: '#fff',
     grey: '#ccc',
     greyLight: '#e3e3e3',

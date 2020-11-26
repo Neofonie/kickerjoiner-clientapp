@@ -123,6 +123,16 @@ export async function setGOGOGO(playerID, gameID) {
     });
 }
 
+export async function deleteGame(gameID) {
+    await db('DELETE', '/games/' + gameID);
+
+    sendMessage({
+        message: 'GAME_UPDATE',
+        gameid: gameID,
+        reason: 'delete game',
+    });
+}
+
 export async function getActiveGames() {
     const showLastHourGames = getTimestampNow() - 3600; // 3600 = 1h in sec
     //const games = await db('GET', `/games?donedate_gte=${showLastHourGames}&_sort=date&_order=desc`);

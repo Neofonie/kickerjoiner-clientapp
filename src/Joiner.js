@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Button, StyleSheet, TextInput, Text } from "react-native";
 import Container from 'react-native-container';
-import { StylesGlobal, Colors, FontSize, FontBold } from "./styles";
+import { StylesGlobal, Colors, FontSize, FontBold, Spacing } from "./styles";
 import { callPlusOne } from "./api";
 
 export default class Joiner extends Component {
@@ -34,6 +34,10 @@ export const StylesJoiner = StyleSheet.create({
     input: {
         ...StylesGlobal.input,
         width: 200,
+        height: 40,
+        padding: Spacing.md,
+        backgroundColor: Colors.white,
+        borderRadius: Spacing.borderRadius,
     },
     wrap: {
         // borderColor: '#fff',

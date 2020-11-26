@@ -1,5 +1,5 @@
-import React, { Component, Fragment } from 'react';
-import { ScrollView, Text } from 'react-native';
+import React, { Component } from 'react';
+import { ScrollView, Text, Platform } from 'react-native';
 import Container from 'react-native-container';
 import { connectToWSS, getActiveGames, sendMessage } from "./src/api";
 import { Colors, StylesGlobal, Br, FontBold } from './src/styles';
@@ -11,7 +11,6 @@ export default class App extends Component {
     state = {
         nickname: '',
         gameid: -1,
-        gogogoVisible: false,
         stateText: '',
         games: [],
         socket: {
@@ -25,24 +24,26 @@ export default class App extends Component {
         connectToWSS((state) => {
             this.setState({ ...state });
         }, async (data) => {
-            console.log('in react', data);
+            console.log('new message from server', data);
             switch (data.message) {
                 case 'CONNECTION_ON': // connection with server is on
                     // store date && clientid
                     sendMessage({
                         message: 'SET_CLIENTNICK',
-                        type: ['react'].join(' / '),
+                        type: ['react', Platform.OS].join(' / '),
                         nick: null,
                     });
                     break;
                 case 'GAME_UPDATE': // joined game got an update
-                    console.log('GAME_UPDATE')
                     this.setState({ games: await getActiveGames() })
                     break;
                 case 'GAME_READY': // joined game got an update
-                    console.log('GAME_READY')
                     this.setState({
-                        gogogoVisible: true,
+                        games: await getActiveGames()
+                    });
+                    break;
+                case 'GAME_GOGOGO': // all four joiners pressed gogogo in one game
+                    this.setState({
                         games: await getActiveGames()
                     });
                     break;
@@ -72,7 +73,7 @@ export default class App extends Component {
                         <Games games={this.state.games}/>
                     </ScrollView>
                     <Text style={{ color: Colors.white, ...FontBold }}>
-                        TODO: <Br />
+                        TODO:<Br />
                         * Client name + Storage<Br />
                         * GOGOGO Button + GOGOGO Overlay<Br />
                         * Delete Game + Joiner<Br />
