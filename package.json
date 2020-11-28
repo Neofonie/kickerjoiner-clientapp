@@ -8,6 +8,8 @@
     "start:web": "expo start --web",
     "start:android": "expo start --android",
     "start:ios": "expo start --ios",
+    "build:android": "expo build:android",
+    "build:ios": "expo build:ios",
     "eject": "expo eject"
   },
   "dependencies": {
