@@ -13,8 +13,17 @@ const lib = {
 export default class Icon extends Component {
     render() {
         return (
-            <TouchableHighlight onPress={() => this.props.onPress()}>
-                <FontAwesomeIcon icon={lib[this.props.fa]} style={this.props.style || {}} secondaryColor={this.props.secondaryColor}/>
+            <TouchableHighlight
+                activeOpacity={0.6}
+                underlayColor="#DDDDDD"
+                onPress={() => {
+                if('onPress' in this.props) {
+                    this.props.onPress();
+                }
+            }}>
+                <FontAwesomeIcon
+                    icon={lib[this.props.fa]}
+                    style={this.props.style}/>
             </TouchableHighlight>
         )
     }

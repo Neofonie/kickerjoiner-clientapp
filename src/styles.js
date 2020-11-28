@@ -30,6 +30,7 @@ export const Spacing = {
     md: 8,
     lg: 16,
     xl: 32,
+    xxl: 40,
     borderRadius: 5,
 }
 
@@ -49,8 +50,14 @@ export const FontBold = { fontWeight: 'bold' };
 
 export const StylesGlobalObj = {
     container: {
-        backgroundColor: Colors.red,
-        padding: Spacing.lg,
+        paddingLeft: Spacing.lg,
+        paddingRight: Spacing.lg,
+        marginBottom: Spacing.lg,
+    },
+    text: {
+        color: Colors.white,
+        ...FontBold,
+        ...FontSize(1),
     },
     input: {
         height: 40,

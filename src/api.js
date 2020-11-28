@@ -1,4 +1,7 @@
+import { Platform } from "react-native";
+import SyncStorage from 'sync-storage';
 // https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
+
 const onlineApi = 'https://kij.willy-selma.de/db';
 export const wsApi = 'wss://kij.willy-selma.de/ws';
 
@@ -32,7 +35,7 @@ export function heartbeat(socket) {
  * @param data
  */
 export function sendMessage(data) {
-    console.log('sendMessage', data)
+    //console.log('sendMessage', data)
     if (socket) {
         socket.send(JSON.stringify(data));
     }
@@ -103,23 +106,11 @@ export function callPlusOne(nick) {
     });
 }
 
-export async function setGOGOGO(playerID, gameID) {
-    const game = await db('GET', '/games/' + gameID);
-    const gogogoPlayer = game.joiner.map((player) => {
-        if (player.id === playerID) {
-            player.gogogo = true;
-        }
-        return player;
-    });
-    await db('PATCH', '/games/' + gameID, {
-        joiner: gogogoPlayer,
-    });
-
+export async function setGOGOGO(joinerID, gameID) {
     sendMessage({
-        message: 'GAME_UPDATE',
+        message: 'GOGOGO',
         gameid: gameID,
-        playerid: playerID,
-        reason: 'gogogo joiner',
+        joinerid: joinerID,
     });
 }
 
@@ -133,10 +124,36 @@ export async function deleteGame(gameID) {
     });
 }
 
+export async function deleteJoiner(joinerID, gameID) {
+    const game = await db('GET', '/games/' + gameID);
+    const filteredJoiner = game.joiner.filter((player) => (player.id !== joinerID));
+    await db('PATCH', '/games/' + gameID, {
+        joiner: filteredJoiner,
+    });
+
+    sendMessage({
+        message: 'GAME_UPDATE',
+        gameid: gameID,
+        joinerid: joinerID,
+        reason: 'delete joiner',
+    });
+}
+
 export async function getActiveGames() {
     const showLastHourGames = getTimestampNow() - 3600; // 3600 = 1h in sec
     //const games = await db('GET', `/games?donedate_gte=${showLastHourGames}&_sort=date&_order=desc`);
     const games = await db('GET', `/games?_sort=date&_order=desc`);
-    console.log('games', games)
+    //console.log('games', games)
     return games;
+}
+
+export function sendClientNick(nickname) {
+    if (nickname) {
+        SyncStorage.set('clientnick', nickname);
+        sendMessage({
+            message: 'SET_CLIENTNICK',
+            type: ['react', Platform.OS].join(' / '),
+            nick: nickname,
+        });
+    }
 }
